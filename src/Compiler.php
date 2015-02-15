@@ -36,6 +36,15 @@ class Compiler {
 		'AfterStop',
 		'Error',
 		'ErrorStop',
+		'Notifiers',
+	);
+
+	/**
+	 * All of the available notifiers services.
+	 *
+	 * @var array
+	 */
+	protected $notifiers = array(
 		'Hipchat',
 		'Slack',
 	);
@@ -351,29 +360,19 @@ class Compiler {
 	}
 
 	/**
-	 * Compile Envoy HipChat statements into valid PHP.
+	 * Compile Envoy Notifier Service (Hipchat, Slack, Flowdock...) statements into valid PHP.
 	 *
 	 * @param  string  $value
 	 * @return string
 	 */
-	protected function compileHipchat($value)
+	protected function compileNotifiers($value)
 	{
-		$pattern = $this->createMatcher('hipchat');
+		foreach ($this->$notifiers as $notifier)
+		{
+			$pattern = $this->createMatcher(strtolower($notifier));
 
-		return preg_replace($pattern, '$1 Laravel\Envoy\Hipchat::make$2->task($task)->send();', $value);
-	}
-
-	/**
-	 * Compile Envoy Slack statements into valid PHP.
-	 *
-	 * @param  string  $value
-	 * @return string
-	 */
-	protected function compileSlack($value)
-	{
-		$pattern = $this->createMatcher('slack');
-
-		return preg_replace($pattern, '$1 Laravel\Envoy\Slack::make$2->task($task)->send();', $value);
+			return preg_replace($pattern, '$1 Laravel\Envoy\Notfiers\\'.$notifier.'::make$2->task($task)->send();', $value);
+		}
 	}
 
 	/**
